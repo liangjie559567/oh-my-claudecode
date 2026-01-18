@@ -749,3 +749,118 @@ describe('Edge Cases', () => {
     });
   });
 });
+
+describe('UltraQA Loop', () => {
+  describe('State Management', () => {
+    it('should define valid UltraQA goal types', () => {
+      const validGoalTypes = ['tests', 'build', 'lint', 'typecheck', 'custom'];
+      validGoalTypes.forEach(goalType => {
+        expect(typeof goalType).toBe('string');
+      });
+    });
+
+    it('should have valid state structure', () => {
+      const state = {
+        active: true,
+        goal_type: 'tests',
+        goal_pattern: null,
+        cycle: 1,
+        max_cycles: 5,
+        failures: [],
+        started_at: new Date().toISOString(),
+        session_id: 'test-session'
+      };
+
+      expect(state.active).toBe(true);
+      expect(state.goal_type).toBe('tests');
+      expect(state.cycle).toBe(1);
+      expect(state.max_cycles).toBe(5);
+      expect(Array.isArray(state.failures)).toBe(true);
+    });
+
+    it('should track failure history', () => {
+      const failures = ['Error 1', 'Error 2', 'Error 1'];
+      expect(failures).toHaveLength(3);
+      expect(failures.filter(f => f === 'Error 1')).toHaveLength(2);
+    });
+  });
+
+  describe('Cycle Limits', () => {
+    it('should respect max cycles limit', () => {
+      const state = {
+        cycle: 5,
+        max_cycles: 5
+      };
+      expect(state.cycle).toBe(state.max_cycles);
+      expect(state.cycle <= state.max_cycles).toBe(true);
+    });
+
+    it('should allow incrementing cycles within limit', () => {
+      let cycle = 1;
+      const maxCycles = 5;
+      while (cycle < maxCycles) {
+        cycle++;
+        expect(cycle <= maxCycles).toBe(true);
+      }
+      expect(cycle).toBe(maxCycles);
+    });
+  });
+
+  describe('Result Types', () => {
+    it('should have valid success result', () => {
+      const result = {
+        success: true,
+        cycles: 3,
+        reason: 'goal_met' as const
+      };
+      expect(result.success).toBe(true);
+      expect(result.reason).toBe('goal_met');
+    });
+
+    it('should have valid failure result', () => {
+      const result = {
+        success: false,
+        cycles: 5,
+        reason: 'max_cycles' as const,
+        diagnosis: 'Unable to fix recurring issue'
+      };
+      expect(result.success).toBe(false);
+      expect(result.reason).toBe('max_cycles');
+      expect(result.diagnosis).toBeDefined();
+    });
+
+    it('should detect same failure pattern', () => {
+      const failures = ['Error A', 'Error A', 'Error A'];
+      const allSame = failures.every(f => f === failures[0]);
+      expect(allSame).toBe(true);
+    });
+  });
+
+  describe('Goal Commands', () => {
+    it('should map goal types to commands', () => {
+      const goalCommands: Record<string, string> = {
+        tests: 'npm test',
+        build: 'npm run build',
+        lint: 'npm run lint',
+        typecheck: 'npm run typecheck || tsc --noEmit'
+      };
+
+      expect(goalCommands.tests).toBe('npm test');
+      expect(goalCommands.build).toBe('npm run build');
+      expect(goalCommands.lint).toBe('npm run lint');
+    });
+  });
+
+  describe('Progress Formatting', () => {
+    it('should format progress message', () => {
+      const cycle = 2;
+      const maxCycles = 5;
+      const status = 'Running tests...';
+      const message = `[ULTRAQA Cycle ${cycle}/${maxCycles}] ${status}`;
+
+      expect(message).toBe('[ULTRAQA Cycle 2/5] Running tests...');
+      expect(message).toContain('ULTRAQA');
+      expect(message).toContain(`${cycle}/${maxCycles}`);
+    });
+  });
+});

@@ -395,3 +395,21 @@ export {
   detectOracleRejection,
   type VerificationState
 } from './ralph-verifier/index.js';
+
+export {
+  // UltraQA Loop (QA cycling workflow)
+  readUltraQAState,
+  writeUltraQAState,
+  clearUltraQAState,
+  startUltraQA,
+  recordFailure,
+  completeUltraQA,
+  stopUltraQA,
+  cancelUltraQA,
+  getGoalCommand,
+  formatProgressMessage,
+  type UltraQAState,
+  type UltraQAGoalType,
+  type UltraQAOptions,
+  type UltraQAResult
+} from './ultraqa-loop/index.js';

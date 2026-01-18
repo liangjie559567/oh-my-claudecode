@@ -136,8 +136,10 @@ async function checkRalphLoop(
       // Check for oracle approval
       if (checkOracleApprovalInTranscript(sessionId)) {
         // Oracle approved - truly complete
+        // Also deactivate ultrawork if it was part of ultrawork-ralph
         clearVerificationState(workingDir);
         clearRalphState(workingDir);
+        deactivateUltrawork(workingDir);
         return {
           shouldBlock: false,
           message: `[RALPH LOOP VERIFIED COMPLETE] Oracle verified task completion after ${state.iteration} iteration(s). Excellent work!`,
@@ -202,7 +204,9 @@ async function checkRalphLoop(
     }
 
     // Fallback if verification state couldn't be created
+    // Also deactivate ultrawork if it was part of ultrawork-ralph
     clearRalphState(workingDir);
+    deactivateUltrawork(workingDir);
     return {
       shouldBlock: false,
       message: `[RALPH LOOP COMPLETE] Task completed after ${state.iteration} iteration(s). Great work!`,
@@ -212,8 +216,10 @@ async function checkRalphLoop(
 
   // Check max iterations
   if (state.iteration >= state.max_iterations) {
+    // Also deactivate ultrawork if it was part of ultrawork-ralph
     clearRalphState(workingDir);
     clearVerificationState(workingDir);
+    deactivateUltrawork(workingDir);
     return {
       shouldBlock: false,
       message: `[RALPH LOOP STOPPED] Max iterations (${state.max_iterations}) reached without completion promise. Consider reviewing the task requirements.`,
