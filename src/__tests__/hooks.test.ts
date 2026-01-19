@@ -1,4 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { mkdirSync, writeFileSync, rmSync } from 'fs';
+import { join } from 'path';
+import { tmpdir } from 'os';
 import {
   extractPromptText,
   removeCodeBlocks,
@@ -13,6 +16,19 @@ import {
   type Todo,
   type IncompleteTodosResult
 } from '../hooks/todo-continuation/index.js';
+import {
+  resetTodoContinuationAttempts
+} from '../hooks/persistent-mode/index.js';
+import {
+  startUltraQA,
+  clearUltraQAState,
+  isRalphLoopActive
+} from '../hooks/ultraqa-loop/index.js';
+import {
+  createRalphLoopHook,
+  clearRalphState,
+  isUltraQAActive
+} from '../hooks/ralph-loop/index.js';
 
 describe('Keyword Detector', () => {
   describe('extractPromptText', () => {
@@ -861,6 +877,193 @@ describe('UltraQA Loop', () => {
       expect(message).toBe('[ULTRAQA Cycle 2/5] Running tests...');
       expect(message).toContain('ULTRAQA');
       expect(message).toContain(`${cycle}/${maxCycles}`);
+    });
+  });
+});
+
+describe('Persistent Mode - Max Attempts Counter', () => {
+  const testSessionId = 'test-session-123';
+
+  beforeEach(() => {
+    // Reset the counter before each test
+    resetTodoContinuationAttempts(testSessionId);
+  });
+
+  afterEach(() => {
+    // Clean up after each test
+    resetTodoContinuationAttempts(testSessionId);
+  });
+
+  it('should export resetTodoContinuationAttempts function', () => {
+    expect(typeof resetTodoContinuationAttempts).toBe('function');
+  });
+
+  it('should not throw when resetting non-existent session', () => {
+    expect(() => resetTodoContinuationAttempts('non-existent')).not.toThrow();
+  });
+
+  it('should allow resetting attempts multiple times', () => {
+    resetTodoContinuationAttempts(testSessionId);
+    resetTodoContinuationAttempts(testSessionId);
+    resetTodoContinuationAttempts(testSessionId);
+    // Should not throw
+    expect(true).toBe(true);
+  });
+});
+
+describe('Mutual Exclusion - UltraQA and Ralph Loop', () => {
+  let testDir: string;
+
+  beforeEach(() => {
+    // Create a unique temp directory for each test
+    testDir = join(tmpdir(), `sisyphus-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    mkdirSync(testDir, { recursive: true });
+    mkdirSync(join(testDir, '.sisyphus'), { recursive: true });
+  });
+
+  afterEach(() => {
+    // Clean up temp directory
+    try {
+      rmSync(testDir, { recursive: true, force: true });
+    } catch {
+      // Ignore cleanup errors
+    }
+  });
+
+  describe('isUltraQAActive', () => {
+    it('should return false when no ultraqa state exists', () => {
+      expect(isUltraQAActive(testDir)).toBe(false);
+    });
+
+    it('should return true when ultraqa is active', () => {
+      const stateFile = join(testDir, '.sisyphus', 'ultraqa-state.json');
+      writeFileSync(stateFile, JSON.stringify({ active: true }));
+      expect(isUltraQAActive(testDir)).toBe(true);
+    });
+
+    it('should return false when ultraqa is not active', () => {
+      const stateFile = join(testDir, '.sisyphus', 'ultraqa-state.json');
+      writeFileSync(stateFile, JSON.stringify({ active: false }));
+      expect(isUltraQAActive(testDir)).toBe(false);
+    });
+
+    it('should return false for invalid JSON', () => {
+      const stateFile = join(testDir, '.sisyphus', 'ultraqa-state.json');
+      writeFileSync(stateFile, 'invalid json');
+      expect(isUltraQAActive(testDir)).toBe(false);
+    });
+  });
+
+  describe('isRalphLoopActive', () => {
+    it('should return false when no ralph state exists', () => {
+      expect(isRalphLoopActive(testDir)).toBe(false);
+    });
+
+    it('should return true when ralph loop is active', () => {
+      const stateFile = join(testDir, '.sisyphus', 'ralph-state.json');
+      writeFileSync(stateFile, JSON.stringify({ active: true }));
+      expect(isRalphLoopActive(testDir)).toBe(true);
+    });
+
+    it('should return false when ralph loop is not active', () => {
+      const stateFile = join(testDir, '.sisyphus', 'ralph-state.json');
+      writeFileSync(stateFile, JSON.stringify({ active: false }));
+      expect(isRalphLoopActive(testDir)).toBe(false);
+    });
+  });
+
+  describe('UltraQA mutual exclusion', () => {
+    it('should fail to start UltraQA when Ralph Loop is active', () => {
+      // Activate Ralph Loop first
+      const ralphStateFile = join(testDir, '.sisyphus', 'ralph-state.json');
+      writeFileSync(ralphStateFile, JSON.stringify({ active: true }));
+
+      // Try to start UltraQA
+      const result = startUltraQA(testDir, 'tests', 'test-session');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Cannot start UltraQA while Ralph Loop is active');
+    });
+
+    it('should succeed starting UltraQA when Ralph Loop is not active', () => {
+      const result = startUltraQA(testDir, 'tests', 'test-session');
+
+      expect(result.success).toBe(true);
+      expect(result.error).toBeUndefined();
+
+      // Clean up
+      clearUltraQAState(testDir);
+    });
+
+    it('should succeed starting UltraQA when ralph state exists but inactive', () => {
+      const ralphStateFile = join(testDir, '.sisyphus', 'ralph-state.json');
+      writeFileSync(ralphStateFile, JSON.stringify({ active: false }));
+
+      const result = startUltraQA(testDir, 'tests', 'test-session');
+
+      expect(result.success).toBe(true);
+
+      // Clean up
+      clearUltraQAState(testDir);
+    });
+  });
+
+  describe('Ralph Loop mutual exclusion', () => {
+    it('should fail to start Ralph Loop when UltraQA is active', () => {
+      // Activate UltraQA first
+      const ultraqaStateFile = join(testDir, '.sisyphus', 'ultraqa-state.json');
+      writeFileSync(ultraqaStateFile, JSON.stringify({ active: true }));
+
+      // Try to start Ralph Loop
+      const hook = createRalphLoopHook(testDir);
+      const result = hook.startLoop('test-session', 'test prompt');
+
+      expect(result).toBe(false);
+    });
+
+    it('should succeed starting Ralph Loop when UltraQA is not active', () => {
+      const hook = createRalphLoopHook(testDir);
+      const result = hook.startLoop('test-session', 'test prompt');
+
+      expect(result).toBe(true);
+
+      // Clean up
+      clearRalphState(testDir);
+    });
+
+    it('should succeed starting Ralph Loop when ultraqa state exists but inactive', () => {
+      const ultraqaStateFile = join(testDir, '.sisyphus', 'ultraqa-state.json');
+      writeFileSync(ultraqaStateFile, JSON.stringify({ active: false }));
+
+      const hook = createRalphLoopHook(testDir);
+      const result = hook.startLoop('test-session', 'test prompt');
+
+      expect(result).toBe(true);
+
+      // Clean up
+      clearRalphState(testDir);
+    });
+  });
+
+  describe('State cleanup', () => {
+    it('should clear UltraQA state properly', () => {
+      const result = startUltraQA(testDir, 'tests', 'test-session');
+      expect(result.success).toBe(true);
+
+      const cleared = clearUltraQAState(testDir);
+      expect(cleared).toBe(true);
+
+      expect(isRalphLoopActive(testDir)).toBe(false);
+    });
+
+    it('should clear Ralph state properly', () => {
+      const hook = createRalphLoopHook(testDir);
+      hook.startLoop('test-session', 'test prompt');
+
+      const cleared = clearRalphState(testDir);
+      expect(cleared).toBe(true);
+
+      expect(isUltraQAActive(testDir)).toBe(false);
     });
   });
 });

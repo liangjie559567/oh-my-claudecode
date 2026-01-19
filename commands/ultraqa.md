@@ -43,7 +43,7 @@ If no structured goal provided, interpret the argument as a custom goal.
 
 3. **ORACLE DIAGNOSIS**: Spawn oracle to analyze failure
    ```
-   Task(subagent_type="oracle", prompt="DIAGNOSE FAILURE:
+   Task(subagent_type="oh-my-claude-sisyphus:oracle", prompt="DIAGNOSE FAILURE:
    Goal: [goal type]
    Output: [test/build output]
    Provide root cause and specific fix recommendations.")

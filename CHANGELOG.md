@@ -5,6 +5,104 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0] - 2026-01-18
+
+### Ralph Loop PRD Support (Major Feature)
+
+Implements structured task tracking inspired by the original [Ralph](https://github.com/snarktank/ralph) project. This brings PRD-based task management to ralph-loop, enabling reliable completion tracking across iterations.
+
+### Added
+
+- **PRD (Product Requirements Document) Support** (`src/hooks/ralph-prd/index.ts`)
+  - `prd.json` structured task format with user stories, acceptance criteria, priorities
+  - Story status tracking (`passes: boolean`) for completion detection
+  - CRUD operations: `readPrd`, `writePrd`, `markStoryComplete`, `getNextStory`
+  - Status calculation: `getPrdStatus` returns completion stats
+  - Formatting utilities for display and context injection
+
+- **Progress Memory System** (`src/hooks/ralph-progress/index.ts`)
+  - Append-only `progress.txt` for memory persistence between iterations
+  - Codebase patterns section for consolidated learnings
+  - Per-story progress entries with implementation notes, files changed, learnings
+  - Pattern extraction and learning retrieval for context injection
+
+- **New Commands**
+  - `/ralph-init <task>` - Scaffold a PRD from task description with auto-generated user stories
+  - `/ultrawork-ralph <task>` - Maximum intensity mode with completion guarantee (ultrawork + ralph loop)
+  - `/ultraqa <goal>` - Autonomous QA cycling workflow (test → verify → fix → repeat)
+  - `/sisyphus-default` - Configure Sisyphus in local project `.claude/CLAUDE.md`
+  - `/sisyphus-default-global` - Configure Sisyphus globally in `~/.claude/CLAUDE.md`
+
+- **New Agent Tiers**
+  - `qa-tester-high` (Opus) - Complex integration testing
+
+- **Comprehensive Test Suites**
+  - `src/__tests__/ralph-prd.test.ts` - 29 tests for PRD operations
+  - `src/__tests__/ralph-progress.test.ts` - 30 tests for progress tracking
+  - Total: 300 tests (up from 231)
+
+### Changed
+
+- **Ralph Loop Enhanced**
+  - Auto-initializes PRD when user runs `/ralph-loop` without existing `prd.json`
+  - PRD-based completion: loop ends when ALL stories have `passes: true`
+  - Context injection includes current story, patterns, and recent learnings
+  - Updated continuation prompts with structured story information
+
+- **Persistent Mode Integration**
+  - `src/hooks/persistent-mode/index.ts` now imports and uses PRD completion checking
+  - Checks PRD status before allowing ralph-loop completion
+  - Clears ultrawork state when PRD loop completes (for ultrawork-ralph)
+
+### Fixed
+
+- **Stale position bug in `addPattern`** - Placeholder removal now happens before calculating separator position
+- **Type safety in `createPrd`** - New `UserStoryInput` type with optional priority field
+- **Recursion guard in `addPattern`** - Prevents infinite loops on repeated initialization failures
+
+### Technical Details
+
+**PRD Structure:**
+```json
+{
+  "project": "ProjectName",
+  "branchName": "ralph/feature-name",
+  "description": "Feature description",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Story title",
+      "description": "User story description",
+      "acceptanceCriteria": ["Criterion 1", "Criterion 2"],
+      "priority": 1,
+      "passes": false
+    }
+  ]
+}
+```
+
+**Progress.txt Structure:**
+```
+# Ralph Progress Log
+Started: 2026-01-18T...
+
+## Codebase Patterns
+- Pattern learned from iteration 1
+- Pattern learned from iteration 2
+
+---
+
+## [2026-01-18 12:00] - US-001
+**What was implemented:**
+- Feature A
+- Feature B
+
+**Learnings for future iterations:**
+- Important pattern discovered
+```
+
+---
+
 ## [2.0.1] - 2026-01-13
 
 ### Added
@@ -249,6 +347,8 @@ Task(subagent_type="oracle", model="opus", prompt="Force Opus for this task")
 
 ---
 
+[2.6.0]: https://github.com/Yeachan-Heo/oh-my-claude-sisyphus/compare/v2.5.0...v2.6.0
+[2.0.1]: https://github.com/Yeachan-Heo/oh-my-claude-sisyphus/compare/v2.0.0...v2.0.1
 [1.11.0]: https://github.com/Yeachan-Heo/oh-my-claude-sisyphus/compare/v1.10.0...v1.11.0
 [1.10.0]: https://github.com/Yeachan-Heo/oh-my-claude-sisyphus/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/Yeachan-Heo/oh-my-claude-sisyphus/compare/v1.8.0...v1.9.0

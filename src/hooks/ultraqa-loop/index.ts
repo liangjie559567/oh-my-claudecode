@@ -7,6 +7,7 @@
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync, unlinkSync } from 'fs';
 import { join } from 'path';
+import { readRalphState } from '../ralph-loop/index.js';
 
 export type UltraQAGoalType = 'tests' | 'build' | 'lint' | 'typecheck' | 'custom';
 
@@ -119,14 +120,31 @@ export function clearUltraQAState(directory: string): boolean {
 }
 
 /**
+ * Check if Ralph Loop is active (mutual exclusion check)
+ */
+export function isRalphLoopActive(directory: string): boolean {
+  const ralphState = readRalphState(directory);
+  return ralphState !== null && ralphState.active === true;
+}
+
+/**
  * Start a new UltraQA cycle
+ * Returns false if Ralph Loop is already active (mutual exclusion)
  */
 export function startUltraQA(
   directory: string,
   goalType: UltraQAGoalType,
   sessionId: string,
   options?: UltraQAOptions
-): boolean {
+): { success: boolean; error?: string } {
+  // Mutual exclusion check: cannot start UltraQA if Ralph Loop is active
+  if (isRalphLoopActive(directory)) {
+    return {
+      success: false,
+      error: 'Cannot start UltraQA while Ralph Loop is active. Cancel Ralph Loop first with /cancel-ralph.'
+    };
+  }
+
   const state: UltraQAState = {
     active: true,
     goal_type: goalType,
@@ -138,7 +156,8 @@ export function startUltraQA(
     session_id: sessionId
   };
 
-  return writeUltraQAState(directory, state);
+  const written = writeUltraQAState(directory, state);
+  return { success: written };
 }
 
 /**
