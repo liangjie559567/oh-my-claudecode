@@ -7,6 +7,18 @@ import { existsSync, readFileSync, writeFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 
+/**
+ * Validates session ID to prevent path traversal attacks.
+ * @param {string} sessionId
+ * @returns {boolean}
+ */
+function isValidSessionId(sessionId) {
+  if (!sessionId || typeof sessionId !== 'string') return false;
+  // Allow alphanumeric, hyphens, and underscores only
+  // Must not start with dot or hyphen
+  return /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,255}$/.test(sessionId);
+}
+
 async function readStdin() {
   const chunks = [];
   for await (const chunk of process.stdin) {
@@ -22,6 +34,38 @@ function readJsonFile(path) {
   } catch {
     return null;
   }
+}
+
+/**
+ * Count incomplete tasks in the new Task system.
+ *
+ * SYNC NOTICE: This function is intentionally duplicated across:
+ * - templates/hooks/persistent-mode.mjs
+ * - templates/hooks/stop-continuation.mjs
+ * - src/hooks/todo-continuation/index.ts (as checkIncompleteTasks)
+ *
+ * Templates cannot import shared modules (they're standalone scripts).
+ * When modifying this logic, update ALL THREE files to maintain consistency.
+ */
+function countIncompleteTasks(sessionId) {
+  if (!sessionId || !isValidSessionId(sessionId)) return 0;
+  const taskDir = join(homedir(), '.claude', 'tasks', sessionId);
+  if (!existsSync(taskDir)) return 0;
+
+  let count = 0;
+  try {
+    const files = readdirSync(taskDir).filter(f => f.endsWith('.json') && f !== '.lock');
+    for (const file of files) {
+      try {
+        const content = readFileSync(join(taskDir, file), 'utf-8');
+        const task = JSON.parse(content);
+        // Match TypeScript isTaskIncomplete(): only pending/in_progress are incomplete
+        // 'deleted' and 'completed' are both treated as done
+        if (task.status === 'pending' || task.status === 'in_progress') count++;
+      } catch { /* skip invalid files */ }
+    }
+  } catch { /* dir read error */ }
+  return count;
 }
 
 function writeJsonFile(path, data) {
@@ -71,6 +115,7 @@ async function main() {
 
     const stopReason = data.stop_reason || data.stopReason || '';
     const userRequested = data.user_requested || data.userRequested || false;
+    const sessionId = data.sessionId || data.session_id || '';
 
     // Check for user abort - skip all continuation enforcement
     // NOTE: Abort patterns are assumed - verify against actual Claude Code API values
@@ -94,6 +139,10 @@ async function main() {
 
     // Count incomplete todos
     const incompleteCount = countIncompleteTodos(todosDir, directory);
+
+    // Count incomplete Tasks
+    const taskCount = countIncompleteTasks(sessionId);
+    const totalIncomplete = taskCount + incompleteCount;
 
     // Priority 1: Ralph Loop with Oracle Verification
     if (ralphState?.active) {
@@ -183,7 +232,7 @@ ${ralphState.prompt ? `Original task: ${ralphState.prompt}` : ''}
     }
 
     // Priority 2: Ultrawork with incomplete todos
-    if (ultraworkState?.active && incompleteCount > 0) {
+    if (ultraworkState?.active && totalIncomplete > 0) {
       const newCount = (ultraworkState.reinforcement_count || 0) + 1;
       ultraworkState.reinforcement_count = newCount;
       ultraworkState.last_checked_at = new Date().toISOString();
@@ -196,7 +245,7 @@ ${ralphState.prompt ? `Original task: ${ralphState.prompt}` : ''}
 
 [ULTRAWORK MODE STILL ACTIVE - Reinforcement #${newCount}]
 
-Your ultrawork session is NOT complete. ${incompleteCount} incomplete todos remain.
+Your ultrawork session is NOT complete. ${totalIncomplete} incomplete items remain.
 
 REMEMBER THE ULTRAWORK RULES:
 - **PARALLEL**: Fire independent calls simultaneously - NEVER wait sequentially
@@ -218,18 +267,19 @@ ${ultraworkState.original_prompt ? `Original task: ${ultraworkState.original_pro
     }
 
     // Priority 3: Todo Continuation
-    if (incompleteCount > 0) {
+    if (totalIncomplete > 0) {
+      const itemType = taskCount > 0 ? 'Tasks' : 'todos';
       console.log(JSON.stringify({
         continue: false,
         reason: `<todo-continuation>
 
-[SYSTEM REMINDER - TODO CONTINUATION]
+[SYSTEM REMINDER - CONTINUATION]
 
-Incomplete tasks remain in your todo list (${incompleteCount} remaining). Continue working on the next pending task.
+Incomplete ${itemType} remain (${totalIncomplete} remaining). Continue working on the next pending item.
 
 - Proceed without asking for permission
-- Mark each task complete when finished
-- Do not stop until all tasks are done
+- Mark each item complete when finished
+- Do not stop until all items are done
 
 </todo-continuation>
 

@@ -3,6 +3,21 @@
 # Unified handler for ultrawork, ralph-loop, and todo continuation
 # Prevents stopping when work remains incomplete
 
+# Validate session ID to prevent path traversal attacks
+# Returns 0 (success) for valid, 1 for invalid
+is_valid_session_id() {
+  local id="$1"
+  if [ -z "$id" ]; then
+    return 1
+  fi
+  # Allow alphanumeric, hyphens, and underscores only
+  # Must not start with dot or hyphen, max 256 chars
+  if echo "$id" | grep -qE '^[a-zA-Z0-9][a-zA-Z0-9_-]{0,255}$'; then
+    return 0
+  fi
+  return 1
+}
+
 # Read stdin
 INPUT=$(cat)
 
@@ -17,6 +32,40 @@ fi
 # Default to current directory
 if [ -z "$DIRECTORY" ]; then
   DIRECTORY=$(pwd)
+fi
+
+# Check for incomplete tasks in new Task system (priority over todos)
+TASKS_DIR="$HOME/.claude/tasks"
+TASK_COUNT=0
+JQ_AVAILABLE=false
+if command -v jq &> /dev/null; then
+  JQ_AVAILABLE=true
+fi
+
+if [ -n "$SESSION_ID" ] && is_valid_session_id "$SESSION_ID" && [ -d "$TASKS_DIR/$SESSION_ID" ]; then
+  for task_file in "$TASKS_DIR/$SESSION_ID"/*.json; do
+    if [ -f "$task_file" ] && [ "$(basename "$task_file")" != ".lock" ]; then
+      if [ "$JQ_AVAILABLE" = "true" ]; then
+        STATUS=$(jq -r '.status // "pending"' "$task_file" 2>/dev/null)
+        # Match TypeScript isTaskIncomplete(): only pending/in_progress are incomplete
+        # 'deleted' and 'completed' are both treated as done
+        if [ "$STATUS" = "pending" ] || [ "$STATUS" = "in_progress" ]; then
+          TASK_COUNT=$((TASK_COUNT + 1))
+        fi
+      else
+        # Fallback: grep for incomplete status values (pending or in_progress)
+        # This is less accurate but provides basic functionality
+        if grep -qE '"status"[[:space:]]*:[[:space:]]*"(pending|in_progress)"' "$task_file" 2>/dev/null; then
+          TASK_COUNT=$((TASK_COUNT + 1))
+        fi
+      fi
+    fi
+  done
+
+  # Warn if using fallback (only once per invocation, to stderr)
+  if [ "$JQ_AVAILABLE" = "false" ] && [ "$TASK_COUNT" -gt 0 ]; then
+    echo "[OMC WARNING] jq not installed - Task counting may be less accurate. Install jq for best results." >&2
+  fi
 fi
 
 # Extract stop reason for abort detection
@@ -86,6 +135,9 @@ for todo_path in "$DIRECTORY/.omc/todos.json" "$DIRECTORY/.claude/todos.json"; d
   fi
 done
 
+# Combine Task and todo counts
+TOTAL_INCOMPLETE=$((TASK_COUNT + INCOMPLETE_COUNT))
+
 # Priority 1: Ralph Loop with Oracle Verification
 if [ -n "$RALPH_STATE" ]; then
   IS_ACTIVE=$(echo "$RALPH_STATE" | jq -r '.active // false' 2>/dev/null)
@@ -132,7 +184,7 @@ EOF
 fi
 
 # Priority 2: Ultrawork Mode with incomplete todos
-if [ -n "$ULTRAWORK_STATE" ] && [ "$INCOMPLETE_COUNT" -gt 0 ]; then
+if [ -n "$ULTRAWORK_STATE" ] && [ "$TOTAL_INCOMPLETE" -gt 0 ]; then
   # Check if active (with jq fallback)
   IS_ACTIVE=""
   if command -v jq &> /dev/null; then
@@ -168,16 +220,21 @@ if [ -n "$ULTRAWORK_STATE" ] && [ "$INCOMPLETE_COUNT" -gt 0 ]; then
     fi
 
     cat << EOF
-{"continue": false, "reason": "<ultrawork-persistence>\\n\\n[ULTRAWORK MODE STILL ACTIVE - Reinforcement #$NEW_COUNT]\\n\\nYour ultrawork session is NOT complete. $INCOMPLETE_COUNT incomplete todos remain.\\n\\nREMEMBER THE ULTRAWORK RULES:\\n- **PARALLEL**: Fire independent calls simultaneously - NEVER wait sequentially\\n- **BACKGROUND FIRST**: Use Task(run_in_background=true) for exploration (10+ concurrent)\\n- **TODO**: Track EVERY step. Mark complete IMMEDIATELY after each\\n- **VERIFY**: Check ALL requirements met before done\\n- **NO Premature Stopping**: ALL TODOs must be complete\\n\\nContinue working on the next pending task. DO NOT STOP until all tasks are marked complete.\\n\\nOriginal task: $ORIGINAL_PROMPT\\n\\n</ultrawork-persistence>\\n\\n---\\n"}
+{"continue": false, "reason": "<ultrawork-persistence>\\n\\n[ULTRAWORK MODE STILL ACTIVE - Reinforcement #$NEW_COUNT]\\n\\nYour ultrawork session is NOT complete. $TOTAL_INCOMPLETE incomplete items remain.\\n\\nREMEMBER THE ULTRAWORK RULES:\\n- **PARALLEL**: Fire independent calls simultaneously - NEVER wait sequentially\\n- **BACKGROUND FIRST**: Use Task(run_in_background=true) for exploration (10+ concurrent)\\n- **TODO**: Track EVERY step. Mark complete IMMEDIATELY after each\\n- **VERIFY**: Check ALL requirements met before done\\n- **NO Premature Stopping**: ALL TODOs must be complete\\n\\nContinue working on the next pending item. DO NOT STOP until all items are marked complete.\\n\\nOriginal task: $ORIGINAL_PROMPT\\n\\n</ultrawork-persistence>\\n\\n---\\n"}
 EOF
     exit 0
   fi
 fi
 
-# Priority 3: Todo Continuation (baseline)
-if [ "$INCOMPLETE_COUNT" -gt 0 ]; then
+# Priority 3: Todo/Task Continuation (baseline)
+if [ "$TOTAL_INCOMPLETE" -gt 0 ]; then
+  if [ "$TASK_COUNT" -gt 0 ]; then
+    ITEM_TYPE="Tasks"
+  else
+    ITEM_TYPE="todos"
+  fi
   cat << EOF
-{"continue": false, "reason": "<todo-continuation>\\n\\n[SYSTEM REMINDER - TODO CONTINUATION]\\n\\nIncomplete tasks remain in your todo list ($INCOMPLETE_COUNT remaining). Continue working on the next pending task.\\n\\n- Proceed without asking for permission\\n- Mark each task complete when finished\\n- Do not stop until all tasks are done\\n\\n</todo-continuation>\\n\\n---\\n"}
+{"continue": false, "reason": "<todo-continuation>\\n\\n[SYSTEM REMINDER - CONTINUATION]\\n\\nIncomplete $ITEM_TYPE remain ($TOTAL_INCOMPLETE remaining). Continue working on the next pending item.\\n\\n- Proceed without asking for permission\\n- Mark each item complete when finished\\n- Do not stop until all items are done\\n\\n</todo-continuation>\\n\\n---\\n"}
 EOF
   exit 0
 fi
