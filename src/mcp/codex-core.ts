@@ -474,11 +474,15 @@ export async function handleAskCodex(args: {
     };
   }
 
-  // If output_file specified, nudge the prompt to write there
+  // If output_file specified, nudge the CLI to write a work summary there
   let userPrompt = resolvedPrompt;
   if (args.output_file) {
     const outputPath = resolve(baseDir, args.output_file);
-    userPrompt = `IMPORTANT: Write your complete response to the file: ${outputPath}\n\n${resolvedPrompt}`;
+    userPrompt = `IMPORTANT: After completing the task, write a WORK SUMMARY to: ${outputPath}
+Include: what was done, files modified/created, key decisions made, and any issues encountered.
+The summary is for the orchestrator to understand what changed - actual work products should be created directly.
+
+${resolvedPrompt}`;
   }
 
   // Check CLI availability
