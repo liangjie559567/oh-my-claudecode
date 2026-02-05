@@ -13817,7 +13817,7 @@ var GEMINI_MODEL_FALLBACKS = [
   "gemini-2.5-pro",
   "gemini-2.5-flash"
 ];
-var GEMINI_VALID_ROLES = ["designer", "executor"];
+var GEMINI_VALID_ROLES = ["designer", "writer", "vision"];
 var MAX_CONTEXT_FILES = 20;
 var MAX_FILE_SIZE = 5 * 1024 * 1024;
 function executeGemini(prompt, model) {

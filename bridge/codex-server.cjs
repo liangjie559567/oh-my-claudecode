@@ -13810,8 +13810,8 @@ ${systemPrompt}
 
 // src/mcp/codex-core.ts
 var CODEX_DEFAULT_MODEL = process.env.OMC_CODEX_DEFAULT_MODEL || "gpt-5.2";
-var CODEX_TIMEOUT = Math.min(Math.max(5e3, parseInt(process.env.OMC_CODEX_TIMEOUT || "180000", 10) || 18e4), 6e5);
-var CODEX_VALID_ROLES = ["architect", "planner", "critic", "code-reviewer", "security-reviewer"];
+var CODEX_TIMEOUT = Math.min(Math.max(5e3, parseInt(process.env.OMC_CODEX_TIMEOUT || "3600000", 10) || 36e5), 36e5);
+var CODEX_VALID_ROLES = ["architect", "planner", "critic", "analyst", "code-reviewer", "security-reviewer", "tdd-guide"];
 var MAX_CONTEXT_FILES = 20;
 var MAX_FILE_SIZE = 5 * 1024 * 1024;
 function parseCodexOutput(output) {
