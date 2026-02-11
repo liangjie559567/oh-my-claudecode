@@ -96,11 +96,10 @@ describe('Inline prompt integration - Codex', () => {
             output_file: '/tmp/test-output.md',
         });
         // prompt_file is present (even whitespace), so file mode is used
-        // It should NOT auto-generate output or persist inline - it uses the provided prompt_file
+        // Whitespace-only prompt_file gets explicit type error
         expect(result.isError).toBe(true);
-        // File mode with whitespace prompt_file should fail at prompt_file validation
         const text = result.content[0].text;
-        expectMissingPromptError(text);
+        expect(text).toContain('prompt_file must be a non-empty string');
     });
     it('should not enter inline mode when prompt_file is empty string', async () => {
         const result = await handleAskCodex({
@@ -158,7 +157,7 @@ describe('Inline prompt integration - Gemini', () => {
         });
         expect(result.isError).toBe(true);
         const text = result.content[0].text;
-        expectMissingPromptError(text);
+        expect(text).toContain('prompt_file must be a non-empty string');
     });
     it('should not enter inline mode when prompt_file is empty string', async () => {
         const result = await handleAskGemini({

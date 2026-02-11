@@ -585,7 +585,7 @@ Suggested: use a working_directory within the project worktree, or set OMC_ALLOW
     // Separate intent detection (field presence) from content validation (non-empty).
     const inlinePrompt = typeof args.prompt === 'string' ? args.prompt : undefined;
     const hasPromptFileField = Object.prototype.hasOwnProperty.call(args, 'prompt_file') && args.prompt_file !== undefined;
-    const promptFileInput = hasPromptFileField && typeof args.prompt_file === 'string' ? args.prompt_file : undefined;
+    const promptFileInput = hasPromptFileField && typeof args.prompt_file === 'string' ? args.prompt_file.trim() || undefined : undefined;
     let resolvedPromptFile = promptFileInput;
     let resolvedOutputFile = typeof args.output_file === 'string' ? args.output_file : undefined;
     const hasInlineIntent = inlinePrompt !== undefined && !hasPromptFileField;

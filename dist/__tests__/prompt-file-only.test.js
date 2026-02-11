@@ -165,7 +165,7 @@ describe('inline prompt mode', () => {
                 output_file: '/tmp/test-output.md',
             });
             expect(result.isError).toBe(true);
-            expectMissingPromptError(result.content[0].text);
+            expect(result.content[0].text).toContain('prompt_file must be a non-empty string');
         });
         it('should block inline prompt with background mode', async () => {
             const result = await handleAskCodex({
@@ -230,7 +230,7 @@ describe('inline prompt mode', () => {
                 output_file: '/tmp/test-output.md',
             });
             expect(result.isError).toBe(true);
-            expectMissingPromptError(result.content[0].text);
+            expect(result.content[0].text).toContain('prompt_file must be a non-empty string');
         });
         it('should require output_file when prompt_file is used (backward compat)', async () => {
             const result = await handleAskGemini({

@@ -17198,7 +17198,7 @@ Suggested: use a working_directory within the project worktree, or set OMC_ALLOW
   }
   const inlinePrompt = typeof args.prompt === "string" ? args.prompt : void 0;
   const hasPromptFileField = Object.prototype.hasOwnProperty.call(args, "prompt_file") && args.prompt_file !== void 0;
-  const promptFileInput = hasPromptFileField && typeof args.prompt_file === "string" ? args.prompt_file : void 0;
+  const promptFileInput = hasPromptFileField && typeof args.prompt_file === "string" ? args.prompt_file.trim() || void 0 : void 0;
   let resolvedPromptFile = promptFileInput;
   let resolvedOutputFile = typeof args.output_file === "string" ? args.output_file : void 0;
   const hasInlineIntent = inlinePrompt !== void 0 && !hasPromptFileField;
