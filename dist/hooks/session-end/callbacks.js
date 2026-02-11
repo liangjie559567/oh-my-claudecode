@@ -7,7 +7,7 @@
 import { writeFileSync, mkdirSync } from 'fs';
 import { dirname, normalize } from 'path';
 import { homedir } from 'os';
-import { getSisyphusConfig, } from '../../features/auto-update.js';
+import { getOMCConfig, } from '../../features/auto-update.js';
 /**
  * Format session summary for notifications
  */
@@ -29,42 +29,6 @@ export function formatSessionSummary(metrics, format = 'markdown') {
 **Started At:** ${metrics.started_at || 'unknown'}
 **Ended At:** ${metrics.ended_at}
 `.trim();
-}
-function normalizeDiscordTagList(tagList) {
-    if (!tagList || tagList.length === 0) {
-        return [];
-    }
-    return tagList
-        .map((tag) => tag.trim())
-        .filter((tag) => tag.length > 0)
-        .map((tag) => {
-        if (tag === '@here' || tag === '@everyone') {
-            return tag;
-        }
-        const roleMatch = tag.match(/^role:(\d+)$/);
-        if (roleMatch) {
-            return `<@&${roleMatch[1]}>`;
-        }
-        if (/^\d+$/.test(tag)) {
-            return `<@${tag}>`;
-        }
-        return tag;
-    });
-}
-function normalizeTelegramTagList(tagList) {
-    if (!tagList || tagList.length === 0) {
-        return [];
-    }
-    return tagList
-        .map((tag) => tag.trim())
-        .filter((tag) => tag.length > 0)
-        .map((tag) => tag.startsWith('@') ? tag : `@${tag}`);
-}
-function prefixMessageWithTags(message, tags) {
-    if (tags.length === 0) {
-        return message;
-    }
-    return `${tags.join(' ')}\n${message}`;
 }
 /**
  * Interpolate path placeholders
@@ -186,7 +150,7 @@ async function sendDiscord(config, message) {
  * Failures in individual callbacks don't block session end.
  */
 export async function triggerStopCallbacks(metrics, _input) {
-    const config = getSisyphusConfig();
+    const config = getOMCConfig();
     const callbacks = config.stopHookCallbacks;
     if (!callbacks) {
         return; // No callbacks configured
@@ -200,15 +164,11 @@ export async function triggerStopCallbacks(metrics, _input) {
     }
     if (callbacks.telegram?.enabled) {
         const summary = formatSessionSummary(metrics, 'markdown');
-        const tags = normalizeTelegramTagList(callbacks.telegram.tagList);
-        const message = prefixMessageWithTags(summary, tags);
-        promises.push(sendTelegram(callbacks.telegram, message));
+        promises.push(sendTelegram(callbacks.telegram, summary));
     }
     if (callbacks.discord?.enabled) {
         const summary = formatSessionSummary(metrics, 'markdown');
-        const tags = normalizeDiscordTagList(callbacks.discord.tagList);
-        const message = prefixMessageWithTags(summary, tags);
-        promises.push(sendDiscord(callbacks.discord, message));
+        promises.push(sendDiscord(callbacks.discord, summary));
     }
     if (promises.length === 0) {
         return; // No enabled callbacks

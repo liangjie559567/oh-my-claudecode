@@ -203,6 +203,8 @@ MCP Delegation (auto-detected when an intent phrase is present):
 - `ask gemini`, `use gemini`, `delegate to gemini` -> `ask_gemini`
 - Bare keywords without an intent phrase do not trigger delegation.
 
+Notifications: `configure-discord` ("configure discord", "setup discord", "discord webhook"), `configure-telegram` ("configure telegram", "setup telegram", "telegram bot")
+
 Utilities: `cancel`, `note`, `learner`, `omc-setup`, `mcp-setup`, `hud`, `doctor`, `help`, `trace`, `release`, `project-session-manager` (psm), `skill`, `writer-memory`, `ralph-init`, `learn-about-omc`
 
 Conflict resolution: explicit mode keywords (`ulw`, `ultrawork`, `eco`, `ecomode`) override defaults. When both are present, ecomode wins. Generic "fast"/"parallel" reads `~/.claude/.omc-config.json` -> `defaultExecutionMode`. Ralph includes ultrawork (persistence wrapper). Ecomode is a model-routing modifier only. Autopilot can transition to ralph or ultraqa. Autopilot and ultrapilot are mutually exclusive.

@@ -30,9 +30,9 @@ import {
   performUpdate,
   formatUpdateNotification,
   getInstalledVersion,
-  getSisyphusConfig,
+  getOMCConfig,
   CONFIG_FILE,
-  type SisyphusConfig,
+  type OMCConfig,
 } from '../features/auto-update.js';
 import {
   install as installSisyphus,
@@ -600,7 +600,7 @@ Examples:
       process.exit(1);
     }
 
-    const config = getSisyphusConfig();
+    const config = getOMCConfig();
     config.stopHookCallbacks = config.stopHookCallbacks || {};
 
     // Show current config
