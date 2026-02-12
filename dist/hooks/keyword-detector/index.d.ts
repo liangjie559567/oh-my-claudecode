@@ -6,7 +6,7 @@
  *
  * Ported from oh-my-opencode's keyword-detector hook.
  */
-export type KeywordType = 'cancel' | 'ralph' | 'autopilot' | 'team' | 'ultrawork' | 'ecomode' | 'pipeline' | 'ralplan' | 'plan' | 'tdd' | 'research' | 'ultrathink' | 'deepsearch' | 'analyze' | 'codex' | 'gemini';
+export type KeywordType = 'cancel' | 'ralph' | 'autopilot' | 'ultrapilot' | 'team' | 'ultrawork' | 'ecomode' | 'swarm' | 'pipeline' | 'ralplan' | 'plan' | 'tdd' | 'research' | 'ultrathink' | 'deepsearch' | 'analyze' | 'codex' | 'gemini';
 export interface DetectedKeyword {
     type: KeywordType;
     keyword: string;
@@ -18,11 +18,6 @@ export interface DetectedKeyword {
  */
 export declare function removeCodeBlocks(text: string): string;
 /**
- * Sanitize text for keyword detection by removing XML tags, URLs, file paths,
- * and code blocks to prevent false positives
- */
-export declare function sanitizeForKeywordDetection(text: string): string;
-/**
  * Extract prompt text from message parts
  */
 export declare function extractPromptText(parts: Array<{
@@ -30,6 +25,10 @@ export declare function extractPromptText(parts: Array<{
     text?: string;
     [key: string]: unknown;
 }>): string;
+/**
+ * Sanitize text to prevent false positives from tags, URLs, file paths, and code.
+ */
+export declare function sanitizeForKeywordDetection(text: string): string;
 /**
  * Detect keywords in text and return matches with type info
  */

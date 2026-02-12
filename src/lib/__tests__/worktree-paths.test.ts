@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdirSync, rmSync, writeFileSync, existsSync } from 'fs';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { mkdirSync, rmSync, existsSync, mkdtempSync } from 'fs';
+import { execSync } from 'child_process';
 import { join } from 'path';
 import {
   validatePath,
@@ -171,11 +172,40 @@ describe('worktree-paths', () => {
       expect(result).toBe(root);
     });
 
-    it('should fall back to process.cwd root for non-git directories', () => {
-      const result = resolveToWorktreeRoot('/tmp');
-      // /tmp is not a git repo, so should fall back to process.cwd root
+    it('should fall back and log for non-git directories', () => {
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const nonGitDir = mkdtempSync('/tmp/worktree-paths-nongit-');
+
+      const result = resolveToWorktreeRoot(nonGitDir);
+
+      // non-git directory should fall back to process.cwd root
       const expectedRoot = getWorktreeRoot(process.cwd()) || process.cwd();
       expect(result).toBe(expectedRoot);
+      expect(errorSpy).toHaveBeenCalledWith(
+        '[worktree] non-git directory provided, falling back to process root',
+        { directory: nonGitDir }
+      );
+
+      errorSpy.mockRestore();
+      rmSync(nonGitDir, { recursive: true, force: true });
+    });
+
+    it('should handle bare repositories by falling back and logging', () => {
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const bareRepoDir = mkdtempSync('/tmp/worktree-paths-bare-');
+      execSync('git init --bare', { cwd: bareRepoDir, stdio: 'pipe' });
+
+      const result = resolveToWorktreeRoot(bareRepoDir);
+
+      const expectedRoot = getWorktreeRoot(process.cwd()) || process.cwd();
+      expect(result).toBe(expectedRoot);
+      expect(errorSpy).toHaveBeenCalledWith(
+        '[worktree] non-git directory provided, falling back to process root',
+        { directory: bareRepoDir }
+      );
+
+      errorSpy.mockRestore();
+      rmSync(bareRepoDir, { recursive: true, force: true });
     });
   });
 
@@ -198,6 +228,29 @@ describe('worktree-paths', () => {
     it('should throw for directories outside the trusted root', () => {
       // /etc is outside any repo worktree root
       expect(() => validateWorkingDirectory('/etc')).toThrow('outside the trusted worktree root');
+    });
+
+    it('should reject a workingDirectory that resolves to a different git root', () => {
+      const nestedRepoDir = mkdtempSync('/tmp/worktree-paths-nested-');
+      execSync('git init', { cwd: nestedRepoDir, stdio: 'pipe' });
+
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+      const result = validateWorkingDirectory(nestedRepoDir);
+
+      const trustedRoot = getWorktreeRoot(process.cwd()) || process.cwd();
+      expect(result).toBe(trustedRoot);
+      expect(errorSpy).toHaveBeenCalledWith(
+        '[worktree] workingDirectory resolved to different git worktree root, using trusted root',
+        expect.objectContaining({
+          workingDirectory: nestedRepoDir,
+          providedRoot: expect.any(String),
+          trustedRoot: expect.any(String),
+        })
+      );
+
+      errorSpy.mockRestore();
+      rmSync(nestedRepoDir, { recursive: true, force: true });
     });
   });
 

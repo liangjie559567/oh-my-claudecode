@@ -408,6 +408,10 @@ export function resolveToWorktreeRoot(directory?: string): string {
     const resolved = resolve(directory);
     const root = getWorktreeRoot(resolved);
     if (root) return root;
+
+    console.error('[worktree] non-git directory provided, falling back to process root', {
+      directory: resolved,
+    });
   }
   // Fallback: derive from process CWD (the MCP server / CLI entry point)
   return getWorktreeRoot(process.cwd()) || process.cwd();
@@ -445,7 +449,7 @@ export function validateWorkingDirectory(workingDirectory?: string): string {
   const providedRoot = getWorktreeRoot(resolved);
 
   if (providedRoot) {
-    // Git resolution succeeded — validate the resolved root is under trusted root.
+    // Git resolution succeeded — require exact worktree identity.
     let providedRootReal: string;
     try {
       providedRootReal = realpathSync(providedRoot);
@@ -453,10 +457,15 @@ export function validateWorkingDirectory(workingDirectory?: string): string {
       throw new Error(`workingDirectory '${workingDirectory}' does not exist or is not accessible.`);
     }
 
-    const rel = relative(trustedRootReal, providedRootReal);
-    if (rel.startsWith('..') || isAbsolute(rel)) {
-      throw new Error(`workingDirectory '${workingDirectory}' is outside the trusted worktree root '${trustedRoot}'.`);
+    if (providedRootReal !== trustedRootReal) {
+      console.error('[worktree] workingDirectory resolved to different git worktree root, using trusted root', {
+        workingDirectory: resolved,
+        providedRoot: providedRootReal,
+        trustedRoot: trustedRootReal,
+      });
+      return trustedRoot;
     }
+
     return providedRoot;
   }
 
