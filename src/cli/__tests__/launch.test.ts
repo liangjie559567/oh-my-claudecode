@@ -123,9 +123,9 @@ describe('runClaude', () => {
     runClaude('/tmp/test', [], 'omc-test-id');
     // Should call tmux new-session
     const calls = execFileSync.mock.calls;
-    const tmuxCall = calls.find((c: string[]) => c[0] === 'tmux');
+    const tmuxCall = calls.find((c: string[]) => c[0] === 'tmux') as string[] | undefined;
     expect(tmuxCall).toBeDefined();
-    expect(tmuxCall[1]).toContain('new-session');
+    expect(tmuxCall![1]).toContain('new-session');
   });
 
   it('uses sanitized custom session name when options.session is provided', async () => {
@@ -135,10 +135,10 @@ describe('runClaude', () => {
     runClaude('/tmp/test', [], 'omc-test-id', { session: 'my custom session!' });
 
     const calls = execFileSync.mock.calls;
-    const tmuxCall = calls.find((c: string[]) => c[0] === 'tmux');
+    const tmuxCall = calls.find((c: string[]) => c[0] === 'tmux') as string[] | undefined;
     expect(tmuxCall).toBeDefined();
     // Session name should be sanitized (spaces/! removed)
-    const sessionNameArg = tmuxCall[1][tmuxCall[1].indexOf('-s') + 1];
+    const sessionNameArg = tmuxCall![1][tmuxCall![1].indexOf('-s') + 1];
     expect(sessionNameArg).toBe('my-custom-session');
   });
 
@@ -149,9 +149,9 @@ describe('runClaude', () => {
     runClaude('/tmp/test', ['--verbose'], 'omc-test-id');
 
     const calls = execFileSync.mock.calls;
-    const claudeCall = calls.find((c: string[]) => c[0] === 'claude');
+    const claudeCall = calls.find((c: string[]) => c[0] === 'claude') as string[] | undefined;
     expect(claudeCall).toBeDefined();
-    expect(claudeCall[1]).toContain('--verbose');
+    expect(claudeCall![1]).toContain('--verbose');
   });
 
   it('runs claude directly when policy is direct', async () => {
@@ -161,9 +161,9 @@ describe('runClaude', () => {
     runClaude('/tmp/test', ['--model', 'x'], 'omc-test-id');
 
     const calls = execFileSync.mock.calls;
-    const claudeCall = calls.find((c: string[]) => c[0] === 'claude');
+    const claudeCall = calls.find((c: string[]) => c[0] === 'claude') as string[] | undefined;
     expect(claudeCall).toBeDefined();
-    expect(claudeCall[1]).toEqual(['--model', 'x']);
+    expect(claudeCall![1]).toEqual(['--model', 'x']);
   });
 });
 
@@ -186,12 +186,12 @@ describe('launchCommand with --no-tmux', () => {
 
     await launchCommand(['--verbose'], { noTmux: true });
 
-    const claudeCall = execFileSync.mock.calls.find((c: string[]) => c[0] === 'claude');
+    const claudeCall = execFileSync.mock.calls.find((c: string[]) => c[0] === 'claude') as string[] | undefined;
     expect(claudeCall).toBeDefined();
-    expect(claudeCall[1]).toContain('--verbose');
+    expect(claudeCall![1]).toContain('--verbose');
 
     // Must NOT create a tmux session
-    const tmuxCall = execFileSync.mock.calls.find((c: string[]) => c[0] === 'tmux');
+    const tmuxCall = execFileSync.mock.calls.find((c: string[]) => c[0] === 'tmux') as string[] | undefined;
     expect(tmuxCall).toBeUndefined();
   });
 
