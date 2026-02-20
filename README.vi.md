@@ -121,9 +121,16 @@ Nhiều chiến lược cho nhiều tình huống — từ điều phối dựa 
 - **Định tuyến model thông minh** - Haiku cho tác vụ đơn giản, Opus cho suy luận phức tạp
 - **Ủy quyền tự động** - Đúng tác tử cho đúng việc, mọi lúc
 
+### Cổng Chất Lượng (tích hợp superpowers)
+
+- **Luật Sắt (Iron Laws)** - Bắt buộc TDD, xác minh trước khi hoàn thành và gỡ lỗi nguyên nhân gốc rễ trong prompt tác tử
+- **HARD-GATE Brainstorming** - Chặn triển khai cho đến khi thiết kế được phê duyệt qua `superpowers:brainstorming`
+- **Từ khóa superpowered** - Kích hoạt pipeline 6 giai đoạn có kiểm soát chất lượng (`superpowered: xây dựng X`)
+- **Công tắc bỏ qua** - Đặt `OMC_SKIP_IRON_LAWS=1` để tắt cổng trong CI hoặc phiên khám phá
+
 ### Trải nghiệm nhà phát triển
 
-- **Magic keywords** - `ralph`, `ulw`, `plan` để kiểm soát rõ ràng
+- **Magic keywords** - `ralph`, `ulw`, `plan`, `superpowered` để kiểm soát rõ ràng
 - **HUD statusline** - Chỉ số điều phối theo thời gian thực trong status bar
 - **Học kỹ năng** - Trích xuất các mẫu tái sử dụng từ các phiên làm việc
 - **Phân tích & theo dõi chi phí** - Hiểu mức sử dụng token trên mọi phiên
@@ -144,6 +151,7 @@ Các phím tắt tùy chọn cho người dùng nâng cao. Không dùng chúng t
 | `ulw` | Song song tối đa | `ulw fix all errors` |
 | `plan` | Phỏng vấn lập kế hoạch | `plan the API` |
 | `ralplan` | Đồng thuận lập kế hoạch lặp | `ralplan this feature` |
+| `superpowered` | Pipeline kiểm soát chất lượng với Luật Sắt | `superpowered: xây dựng dịch vụ thanh toán` |
 | `swarm` | Từ khóa cũ (chuyển sang Team) | `swarm 5 agents: fix lint errors` |
 | `ultrapilot` | Từ khóa cũ (chuyển sang Team) | `ultrapilot: build a fullstack app` |
 
