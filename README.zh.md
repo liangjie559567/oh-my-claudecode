@@ -96,9 +96,16 @@ autopilot: build a REST API for managing tasks
 - **智能模型路由** - 简单任务用 Haiku，复杂推理用 Opus
 - **自动委派** - 每次都选择最合适的智能体
 
+### 质量门控（superpowers 集成）
+
+- **铁律（Iron Laws）** - 在智能体提示中强制执行 TDD、完成前验证、根因调试
+- **头脑风暴硬门控** - 通过 `superpowers:brainstorming` 完成设计审批前阻断实现
+- **superpowered 关键词** - 触发质量门控六阶段流水线（`superpowered: 构建 X`）
+- **跳过开关** - 设置 `OMC_SKIP_IRON_LAWS=1` 可在 CI 或探索性会话中禁用门控
+
 ### 开发者体验
 
-- **魔法关键词** - `ralph`、`ulw`、`plan` 提供显式控制
+- **魔法关键词** - `ralph`、`ulw`、`plan`、`superpowered` 提供显式控制
 - **HUD 状态栏** - 状态栏实时显示编排指标
 - **技能学习** - 从会话中提取可复用模式
 - **分析与成本追踪** - 了解所有会话的 token 使用情况
@@ -118,6 +125,7 @@ autopilot: build a REST API for managing tasks
 | `ulw` | 最大并行化 | `ulw fix all errors` |
 | `plan` | 规划访谈 | `plan the API` |
 | `ralplan` | 迭代规划共识 | `ralplan this feature` |
+| `superpowered` | 质量门控流水线（含铁律） | `superpowered: 构建支付服务` |
 
 **ralph 包含 ultrawork：** 激活 ralph 模式时，会自动包含 ultrawork 的并行执行。无需组合关键词。
 
