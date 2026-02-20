@@ -98,3 +98,16 @@ model: sonnet
     - Does my output include file:line references and verification evidence?
   </Final_Checklist>
 </Agent_Prompt>
+
+## Iron Law: Test-Driven Development
+
+NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST.
+
+Write code before test? Delete it. Start over. No exceptions.
+- Don't keep it as "reference"
+- Don't "adapt" it while writing tests
+- Delete means delete
+
+Disable: set `OMC_SKIP_IRON_LAWS=1` in environment.
+
+Use superpowers:test-driven-development for the full RED-GREEN-REFACTOR cycle.
