@@ -339,11 +339,18 @@ function removeTriggerWords(prompt: string, triggers: string[]): string {
 /**
  * All built-in magic keyword definitions
  */
+const superpoweredEnhancement: MagicKeyword = {
+  triggers: ["superpowered", "quality-gated"],
+  description: "Activates superpowered quality-gated mode",
+  action: (prompt: string) => prompt
+};
+
 export const builtInMagicKeywords: MagicKeyword[] = [
   ultraworkEnhancement,
   searchEnhancement,
   analyzeEnhancement,
-  ultrathinkEnhancement
+  ultrathinkEnhancement,
+  superpoweredEnhancement
 ];
 
 /**
