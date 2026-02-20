@@ -1,3 +1,11 @@
+# oh-my-claudecode v4.2.17
+
+### Fixed
+
+- **docs**: Updated plugin install URL to `liangjie559567/Claude-AI`.
+
+---
+
 # oh-my-claudecode v4.2.16
 
 ### Added
