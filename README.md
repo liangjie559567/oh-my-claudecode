@@ -123,9 +123,16 @@ Multiple strategies for different use cases — from Team-backed orchestration t
 - **Smart model routing** - Haiku for simple tasks, Opus for complex reasoning
 - **Automatic delegation** - Right agent for the job, every time
 
+### Quality Gates (superpowers integration)
+
+- **Iron Laws** - TDD, verification-before-completion, and root-cause debugging enforced in agent prompts
+- **Brainstorming HARD-GATE** - Blocks implementation until design is approved via `superpowers:brainstorming`
+- **superpowered keyword** - Triggers quality-gated 6-phase pipeline (`superpowered: build X`)
+- **Bypass** - Set `OMC_SKIP_IRON_LAWS=1` to disable gates in CI or exploratory sessions
+
 ### Developer Experience
 
-- **Magic keywords** - `ralph`, `ulw`, `plan` for explicit control
+- **Magic keywords** - `ralph`, `ulw`, `plan`, `superpowered` for explicit control
 - **HUD statusline** - Real-time orchestration metrics in your status bar
 - **Skill learning** - Extract reusable patterns from your sessions
 - **Analytics & cost tracking** - Understand token usage across all sessions
@@ -147,6 +154,7 @@ Optional shortcuts for power users. Natural language works fine without them.
 | `plan` | Planning interview | `plan the API` |
 | `ralplan` | Iterative planning consensus | `ralplan this feature` |
 | `swarm` | Legacy keyword (routes to Team) | `swarm 5 agents: fix lint errors` |
+| `superpowered` | Quality-gated pipeline with Iron Laws | `superpowered: build a payment service` |
 | `ultrapilot` | Legacy keyword (routes to Team) | `ultrapilot: build a fullstack app` |
 
 **Notes:**

@@ -1,3 +1,15 @@
+# oh-my-claudecode v4.2.16
+
+### Added
+
+- **superpowers integration**: Injected Iron Laws into `executor`, `deep-executor`, `verifier`, and `debugger` agents — enforcing TDD, verification-before-completion, and root-cause debugging as non-negotiable constraints.
+- **brainstorming HARD-GATE** (`src/features/brainstorming-gate/`): State-file gate that blocks implementation until `superpowers:brainstorming` design approval is recorded. Bypass with `OMC_SKIP_IRON_LAWS=1`.
+- **superpowered skill** (`src/features/builtin-skills/superpowered.md`): Quality-gated 6-phase development pipeline combining OMC orchestration with superpowers skills.
+- **magic keywords**: Added `superpowered` and `quality-gated` as detection triggers in `detectMagicKeywords`.
+- **28 new tests**: Iron Laws, brainstorming-gate, and magic-keywords test suites covering boundary and integration scenarios.
+
+---
+
 # oh-my-claudecode v4.2.15
 
 ### Added
