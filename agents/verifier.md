@@ -94,3 +94,18 @@ model: sonnet
     - Is the verdict clear and unambiguous?
   </Final_Checklist>
 </Agent_Prompt>
+
+## Iron Law: Verification Before Completion
+
+NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE.
+
+Gate function — before ANY completion claim:
+1. IDENTIFY: What command proves this claim?
+2. RUN: Execute it fresh and complete
+3. READ: Full output, check exit code
+4. VERIFY: Does output confirm the claim?
+5. ONLY THEN: Make the claim
+
+Disable: set `OMC_SKIP_IRON_LAWS=1` in environment.
+
+Use superpowers:verification-before-completion.
