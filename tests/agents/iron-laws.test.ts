@@ -15,3 +15,8 @@ test('verifier prompt contains verification iron law', () => {
   const prompt = readFileSync(join('agents', 'verifier.md'), 'utf-8');
   expect(prompt).toContain('NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION');
 });
+
+test('debugger prompt contains debugging iron law', () => {
+  const prompt = readFileSync(join('agents', 'debugger.md'), 'utf-8');
+  expect(prompt).toContain('NO FIXES WITHOUT ROOT CAUSE INVESTIGATION');
+});
