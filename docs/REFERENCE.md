@@ -380,10 +380,11 @@ Just include these words anywhere in your prompt to activate enhanced modes:
 | Keyword | Effect |
 |---------|--------|
 | `ultrawork`, `ulw`, `uw` | Activates parallel agent orchestration |
-| ``, `eco`, `efficient`, `save-tokens`, `budget` | Token-efficient parallel execution |
 | `autopilot`, `build me`, `I want a` | Full autonomous execution |
 | `ultrapilot`, `parallel build`, `swarm build` | Parallel autopilot (3-5x faster) |
 | `ralph`, `don't stop`, `must complete` | Persistence until verified complete |
+| `superpowered` | Quality-gated 6-phase pipeline with Iron Laws |
+| `quality-gated` | Alias for superpowered quality pipeline |
 | `plan this`, `plan the` | Planning interview workflow |
 | `ralplan` | Iterative planning consensus |
 | `search`, `find`, `locate` | Enhanced search mode |
@@ -402,8 +403,8 @@ Just include these words anywhere in your prompt to activate enhanced modes:
 # Maximum parallelism
 ultrawork implement user authentication with OAuth
 
-# Token-efficient parallelism
-eco fix all TypeScript errors
+# Quality-gated pipeline
+superpowered: build a payment service
 
 # Enhanced search
 find all files that import the utils module
