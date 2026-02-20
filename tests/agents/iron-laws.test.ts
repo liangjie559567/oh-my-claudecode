@@ -10,3 +10,8 @@ test('deep-executor prompt contains TDD iron law', () => {
   const prompt = readFileSync(join('agents', 'deep-executor.md'), 'utf-8');
   expect(prompt).toContain('NO PRODUCTION CODE WITHOUT A FAILING TEST');
 });
+
+test('verifier prompt contains verification iron law', () => {
+  const prompt = readFileSync(join('agents', 'verifier.md'), 'utf-8');
+  expect(prompt).toContain('NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION');
+});
