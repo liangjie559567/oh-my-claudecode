@@ -22,7 +22,7 @@ English | [한국어](README.ko.md) | [中文](README.zh.md) | [日本語](READM
 
 **Step 1: Install**
 ```bash
-/plugin marketplace add https://github.com/Yeachan-Heo/oh-my-claudecode
+/plugin marketplace add https://github.com/liangjie559567/Claude-AI
 /plugin install oh-my-claudecode
 ```
 

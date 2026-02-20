@@ -20,7 +20,7 @@
 
 **Bước 1: Cài đặt**
 ```bash
-/plugin marketplace add https://github.com/Yeachan-Heo/oh-my-claudecode
+/plugin marketplace add https://github.com/liangjie559567/Claude-AI
 /plugin install oh-my-claudecode
 ```
 
