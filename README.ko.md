@@ -96,9 +96,16 @@ autopilot: build a REST API for managing tasks
 - **똑똑한 모델 라우팅** - 간단한 작업엔 Haiku, 복잡한 추론엔 Opus
 - **자동 위임** - 매번 작업에 맞는 올바른 에이전트 선택
 
+### 품질 게이트 (superpowers 통합)
+
+- **철칙 (Iron Laws)** - TDD, 완료 전 검증, 근본 원인 디버깅을 에이전트 프롬프트에 강제 적용
+- **브레인스토밍 HARD-GATE** - `superpowers:brainstorming` 설계 승인 전까지 구현 차단
+- **superpowered 키워드** - 품질 게이트 6단계 파이프라인 실행 (`superpowered: X 구축`)
+- **건너뛰기 스위치** - `OMC_SKIP_IRON_LAWS=1` 로 CI 또는 탐색 세션에서 게이트 비활성화
+
 ### 개발자 경험
 
-- **매직 키워드** - 명시적 제어를 위한 `ralph`, `ulw`, `plan`
+- **매직 키워드** - 명시적 제어를 위한 `ralph`, `ulw`, `plan`, `superpowered`
 - **HUD 상태바** - 상태바에서 실시간 오케스트레이션 메트릭 확인
 - **스킬 학습** - 세션에서 재사용 가능한 패턴 추출
 - **분석 및 비용 추적** - 모든 세션의 토큰 사용량 이해
@@ -118,6 +125,7 @@ autopilot: build a REST API for managing tasks
 | `ulw` | 최대 병렬화 | `ulw fix all errors` |
 | `plan` | 계획 인터뷰 | `plan the API` |
 | `ralplan` | 반복적 계획 합의 | `ralplan this feature` |
+| `superpowered` | 철칙 포함 품질 게이트 파이프라인 | `superpowered: 결제 서비스 구축` |
 
 **ralph는 ultrawork를 포함합니다:** ralph 모드를 활성화하면 자동으로 ultrawork의 병렬 실행이 포함됩니다. 키워드를 결합할 필요가 없습니다.
 

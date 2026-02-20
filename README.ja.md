@@ -96,9 +96,16 @@ autopilot: build a REST API for managing tasks
 - **スマートモデルルーティング** - シンプルなタスクは Haiku、複雑な推論は Opus
 - **自動委譲** - 常に適材適所
 
+### 品質ゲート（superpowers 統合）
+
+- **鉄則（Iron Laws）** - TDD・完了前検証・根本原因デバッグをエージェントプロンプトに強制
+- **ブレインストーミング HARD-GATE** - `superpowers:brainstorming` で設計承認が完了するまで実装をブロック
+- **superpowered キーワード** - 品質ゲート付き6フェーズパイプラインを起動（`superpowered: X を構築`）
+- **スキップスイッチ** - `OMC_SKIP_IRON_LAWS=1` で CI や探索的セッションのゲートを無効化
+
 ### 開発者体験
 
-- **マジックキーワード** - `ralph`、`ulw`、`plan` で明示的制御
+- **マジックキーワード** - `ralph`、`ulw`、`plan`、`superpowered` で明示的制御
 - **HUD ステータスライン** - ステータスバーでリアルタイムのオーケストレーション指標を表示
 - **スキル学習** - セッションから再利用可能なパターンを抽出
 - **分析とコスト追跡** - 全セッションのトークン使用状況を把握
@@ -118,6 +125,7 @@ autopilot: build a REST API for managing tasks
 | `ulw` | 最大並列化 | `ulw fix all errors` |
 | `plan` | 計画インタビュー | `plan the API` |
 | `ralplan` | 反復的計画合意形成 | `ralplan this feature` |
+| `superpowered` | 鉄則付き品質ゲートパイプライン | `superpowered: 決済サービスを構築` |
 
 **ralph は ultrawork を含む:** ralph モードを有効にすると、ultrawork の並列実行が自動的に含まれます。キーワードを組み合わせる必要はありません。
 

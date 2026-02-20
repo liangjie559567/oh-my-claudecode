@@ -96,9 +96,16 @@ Múltiples estrategias para diferentes casos de uso - desde construcciones compl
 - **Enrutamiento inteligente de modelos** - Haiku para tareas simples, Opus para razonamiento complejo
 - **Delegación automática** - El agente correcto para el trabajo, siempre
 
+### Puertas de Calidad (integración superpowers)
+
+- **Leyes de Hierro (Iron Laws)** - TDD, verificación antes de completar y depuración de causa raíz aplicadas en los prompts de agentes
+- **HARD-GATE de Brainstorming** - Bloquea la implementación hasta que se apruebe el diseño con `superpowers:brainstorming`
+- **Palabra clave superpowered** - Activa el pipeline de 6 fases con control de calidad (`superpowered: construir X`)
+- **Interruptor de omisión** - Establece `OMC_SKIP_IRON_LAWS=1` para deshabilitar las puertas en CI o sesiones exploratorias
+
 ### Experiencia de Desarrollo
 
-- **Palabras clave mágicas** - `ralph`, `ulw`, `plan` para control explícito
+- **Palabras clave mágicas** - `ralph`, `ulw`, `plan`, `superpowered` para control explícito
 - **Barra de estado HUD** - Métricas de orquestación en tiempo real en tu barra de estado
 - **Aprendizaje de habilidades** - Extrae patrones reutilizables de tus sesiones
 - **Análisis y seguimiento de costos** - Comprende el uso de tokens en todas las sesiones
@@ -118,6 +125,7 @@ Atajos opcionales para usuarios avanzados. El lenguaje natural funciona bien sin
 | `ulw` | Máximo paralelismo | `ulw fix all errors` |
 | `plan` | Entrevista de planificación | `plan the API` |
 | `ralplan` | Consenso de planificación iterativa | `ralplan this feature` |
+| `superpowered` | Pipeline con control de calidad y Leyes de Hierro | `superpowered: construir un servicio de pagos` |
 
 **ralph incluye ultrawork:** Cuando activas el modo ralph, automáticamente incluye la ejecución paralela de ultrawork. No es necesario combinar palabras clave.
 

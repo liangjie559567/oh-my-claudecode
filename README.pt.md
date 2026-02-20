@@ -121,9 +121,16 @@ Múltiplas estratégias para diferentes casos de uso — da orquestração com T
 - **Roteamento inteligente de modelos** - Haiku para tarefas simples, Opus para raciocínio complexo
 - **Delegação automática** - O agente certo para o trabalho, sempre
 
+### Portões de Qualidade (integração superpowers)
+
+- **Leis de Ferro (Iron Laws)** - TDD, verificação antes de concluir e depuração de causa raiz aplicadas nos prompts dos agentes
+- **HARD-GATE de Brainstorming** - Bloqueia a implementação até que o design seja aprovado via `superpowers:brainstorming`
+- **Palavra-chave superpowered** - Ativa o pipeline de 6 fases com controle de qualidade (`superpowered: construir X`)
+- **Chave de bypass** - Defina `OMC_SKIP_IRON_LAWS=1` para desabilitar os portões em CI ou sessões exploratórias
+
 ### Experiência do Desenvolvedor
 
-- **Magic keywords** - `ralph`, `ulw`, `plan` para controle explícito
+- **Magic keywords** - `ralph`, `ulw`, `plan`, `superpowered` para controle explícito
 - **HUD statusline** - Métricas de orquestração em tempo real na sua barra de status
 - **Aprendizado de skills** - Extraia padrões reutilizáveis das suas sessões
 - **Analytics e rastreamento de custos** - Entenda o uso de tokens em todas as sessões
@@ -144,6 +151,7 @@ Atalhos opcionais para usuários avançados. Linguagem natural funciona bem sem 
 | `ulw` | Paralelismo máximo | `ulw fix all errors` |
 | `plan` | Entrevista de planejamento | `plan the API` |
 | `ralplan` | Consenso de planejamento iterativo | `ralplan this feature` |
+| `superpowered` | Pipeline com controle de qualidade e Leis de Ferro | `superpowered: construir um serviço de pagamentos` |
 | `swarm` | Palavra-chave legada (roteia para Team) | `swarm 5 agents: fix lint errors` |
 | `ultrapilot` | Palavra-chave legada (roteia para Team) | `ultrapilot: build a fullstack app` |
 
