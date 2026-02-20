@@ -92,3 +92,19 @@ model: sonnet
     - Do all findings cite file:line references?
   </Final_Checklist>
 </Agent_Prompt>
+
+## Iron Law: Systematic Debugging
+
+NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST.
+
+4 phases — must complete each before proceeding:
+1. Root Cause Investigation (read errors, reproduce, check changes)
+2. Pattern Analysis (find working examples, compare)
+3. Hypothesis & Testing (one hypothesis, minimal change)
+4. Implementation (failing test first, single fix)
+
+3+ fixes failed? STOP. Escalate to architect agent. If architect fails, notify user.
+
+Disable: set `OMC_SKIP_IRON_LAWS=1` in environment.
+
+Use superpowers:systematic-debugging.
